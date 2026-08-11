@@ -1,4 +1,6 @@
 import { Readable } from "node:stream";
+import { writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { join } from "node:path";
 import { Router, type IRouter } from "express";
 import { RequestUploadUrlBody, RequestUploadUrlResponse } from "@workspace/api-zod";
 import { mediaTable } from "@workspace/db";
@@ -20,6 +22,18 @@ router.post("/storage/uploads/request-url", requireAuth, async (req, res): Promi
   res.json(RequestUploadUrlResponse.parse(result));
 });
 
+router.put("/storage/local-upload/:id", requireAuth, async (req, res): Promise<void> => {
+  const { id } = req.params;
+  const privateDir = process.env.PRIVATE_OBJECT_DIR || "/tmp/uploads";
+  const localDir = join(privateDir, "uploads");
+  if (!existsSync(localDir)) mkdirSync(localDir, { recursive: true });
+  const chunks: Buffer[] = [];
+  for await (const chunk of req) chunks.push(Buffer.from(chunk));
+  const buffer = Buffer.concat(chunks);
+  writeFileSync(join(localDir, id), buffer);
+  res.json({ ok: true });
+});
+
 router.get("/storage/objects/*path", async (req, res): Promise<void> => {
   const raw = req.params.path;
   const objectPath = `/objects/${Array.isArray(raw) ? raw.join("/") : raw}`;
@@ -30,7 +44,12 @@ router.get("/storage/objects/*path", async (req, res): Promise<void> => {
       res.status(401).json({ error: "Unauthorized" });
       return;
     }
-    const response = await storage.download(await storage.getFile(objectPath));
+    const file = await storage.getFile(objectPath);
+    if (!file) {
+      res.status(404).json({ error: "Object not found" });
+      return;
+    }
+    const response = await storage.download(file);
     res.status(response.status);
     response.headers.forEach((value, key) => res.setHeader(key, value));
     if (response.body) Readable.fromWeb(response.body as ReadableStream<Uint8Array>).pipe(res);
