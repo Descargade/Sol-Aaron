@@ -4,7 +4,7 @@ services:
     runtime: node
     plan: free
     rootDir: artifacts/api-server
-    buildCommand: cd ../.. && pnpm install --frozen-lockfile && cd artifacts/api-server && pnpm run build
+    buildCommand: cd ../.. && corepack enable && corepack prepare pnpm@latest --activate && pnpm install && cd artifacts/api-server && pnpm run build
     startCommand: node --enable-source-maps ./dist/index.mjs
     envVars:
       - key: NODE_ENV
