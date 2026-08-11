@@ -1,10 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "vite",
-  "installCommand": "pnpm install",
+  "installCommand": "npm install -g pnpm && pnpm install",
   "buildCommand": "pnpm --filter @workspace/nuestra-historia run build",
   "outputDirectory": "artifacts/nuestra-historia/dist/public",
-  "frameworkSource": "community",
+  "framework": null,
   "rewrites": [
     { "source": "/((?!assets/|.*\\.).*)", "destination": "/index.html" }
   ],
