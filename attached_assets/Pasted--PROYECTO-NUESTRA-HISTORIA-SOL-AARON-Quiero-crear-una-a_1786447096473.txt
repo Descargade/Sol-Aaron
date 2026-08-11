@@ -1,0 +1,311 @@
+# ❤️ PROYECTO: “NUESTRA HISTORIA” — SOL & AARON
+
+Quiero crear una aplicación web romántica como regalo de cumpleaños para mi esposa.
+
+El sitio se llamará:
+
+**“Nuestra Historia”**
+
+Frase principal:
+
+**“Nuestra historia todavía se está escribiendo.”**
+
+Debe ser una aplicación REAL y funcional, no solamente una landing page.
+
+## OBJETIVO
+
+Quiero un sitio elegante, romántico y moderno que funcione como nuestro álbum digital.
+
+Cualquier persona con el enlace puede entrar y ver el contenido que nosotros decidamos hacer público.
+
+Solamente dos usuarios pueden iniciar sesión y administrar el sitio:
+
+* `solsaldena`
+* `aarongonzalez`
+
+Las contraseñas iniciales deben configurarse de forma segura mediante Secrets/variables de entorno y almacenarse con hashing. NO exponerlas en frontend, código ni README.
+
+## DISEÑO
+
+Quiero un diseño:
+
+* elegante
+* romántico
+* cinematográfico
+* moderno
+* minimalista
+* premium
+
+Evitar un diseño infantil o lleno de corazones.
+
+Usar tonos oscuros, bordó, crema y detalles dorados sutiles.
+
+Utilizar una tipografía elegante para títulos y una moderna para textos.
+
+La página debe sentirse como una mezcla entre:
+
+**álbum de recuerdos + carta de amor + museo digital + historia de pareja.**
+
+---
+
+# PÁGINA PÚBLICA
+
+Crear estas secciones:
+
+### 1. PORTADA
+
+Mostrar:
+
+**Nuestra Historia**
+
+**Sol & Aaron**
+
+**“Nuestra historia todavía se está escribiendo...”**
+
+Botón:
+
+**“Entrar a nuestra historia ❤️”**
+
+Permitir configurar una fotografía principal.
+
+### 2. CUMPLEAÑOS
+
+Sección especial:
+
+**“Hoy celebramos a Sol ❤️”**
+
+Con una pequeña animación elegante de celebración.
+
+La fecha debe ser editable.
+
+### 3. CARTA
+
+Sección:
+
+**“Para Sol”**
+
+Una carta romántica editable desde el panel privado.
+
+### 4. TIMELINE
+
+Una línea del tiempo donde podamos agregar:
+
+* fecha
+* título
+* descripción
+* fotografía
+
+Ejemplos:
+
+* Nos conocimos
+* Primer recuerdo
+* Primer viaje
+* Momentos especiales
+
+### 5. GALERÍA
+
+Galería de fotos y videos.
+
+Permitir:
+
+* título
+* descripción
+* fecha
+* álbum
+* público/privado
+
+Crear un lightbox bonito para las fotografías.
+
+### 6. ÁLBUMES
+
+Permitir crear álbumes como:
+
+❤️ Nosotros
+✈️ Viajes
+😂 Momentos random
+🎂 Cumpleaños
+🥰 Momentos favoritos
+
+Los álbumes deben poder administrarse desde el panel.
+
+### 7. COSAS QUE AMO DE VOS
+
+Crear tarjetas con pequeños mensajes.
+
+Ejemplo:
+
+**“Tu sonrisa”**
+
+“Porque puede cambiar completamente mi día.”
+
+Debe poder editarse desde el panel.
+
+### 8. NUESTRA MÚSICA
+
+Permitir agregar una canción mediante un enlace de Spotify o YouTube.
+
+### 9. MENSAJES
+
+Los visitantes pueden dejar un mensaje para nosotros.
+
+Los mensajes deben quedar pendientes de aprobación.
+
+Desde el panel podemos aprobar o eliminar mensajes.
+
+### 10. FINAL
+
+Mostrar:
+
+**“Continuará...”**
+
+**“Porque todavía nos quedan muchas historias por vivir.” ❤️**
+
+---
+
+# PANEL PRIVADO
+
+Crear `/admin`.
+
+Debe tener un dashboard sencillo y bonito.
+
+Secciones:
+
+* Dashboard
+* Fotos/Videos
+* Álbumes
+* Timeline
+* Carta
+* Cosas que amo
+* Música
+* Mensajes
+* Configuración
+
+Desde el panel debemos poder:
+
+* subir fotos
+* subir videos
+* crear álbumes
+* crear recuerdos
+* editar contenido
+* eliminar contenido
+* marcar contenido como público o privado
+* administrar mensajes
+
+---
+
+# 📱 MOBILE-FIRST
+
+ESTO ES MUY IMPORTANTE.
+
+La página debe diseñarse pensando primero en celulares.
+
+Debe funcionar perfectamente en:
+
+* Android
+* iPhone
+* tablet
+* notebook
+* desktop
+
+No debe existir:
+
+* scroll horizontal
+* texto cortado
+* botones pequeños
+* elementos superpuestos
+* imágenes deformadas
+
+La galería debe adaptarse al tamaño de pantalla.
+
+La timeline debe convertirse en vertical en celulares.
+
+El panel `/admin` también debe funcionar perfectamente desde el celular.
+
+**Debemos poder iniciar sesión desde el teléfono y subir una foto o video directamente desde la galería del dispositivo.**
+
+---
+
+# TECNOLOGÍA
+
+Utilizar una arquitectura sencilla y estable para Replit.
+
+Preferentemente:
+
+* React
+* TypeScript
+* Tailwind CSS
+* PostgreSQL
+* Prisma o Drizzle
+* autenticación segura
+* almacenamiento persistente para fotos/videos
+
+No utilizar localStorage para datos importantes.
+
+No guardar imágenes/videos dentro del repositorio.
+
+Mantener el código organizado y fácil de modificar.
+
+---
+
+# SEGURIDAD
+
+Implementar autenticación real.
+
+El frontend NO debe ser el encargado de proteger `/admin`; el backend debe verificar la sesión.
+
+Las contraseñas deben estar protegidas mediante hashing.
+
+Los visitantes solamente pueden ver contenido público.
+
+Sol y Aaron pueden administrar contenido privado.
+
+Validar los archivos subidos y limitar tamaños/formats.
+
+No exponer Secrets.
+
+---
+
+# IMPORTANTE
+
+No quiero funcionalidades falsas.
+
+Si aparece un botón, debe funcionar.
+
+Si aparece una galería, debe utilizar datos reales.
+
+Si subimos una foto, debe persistir después de reiniciar la aplicación.
+
+No quiero una maqueta.
+
+Quiero una primera versión funcional y bonita que podamos seguir mejorando.
+
+---
+
+# FORMA DE TRABAJO
+
+Como estoy utilizando un plan básico de Replit, prioriza una implementación sencilla y eficiente.
+
+NO intentes construir demasiadas funcionalidades avanzadas de una sola vez.
+
+Primero consigue una V1 funcional con:
+
+1. Diseño público.
+2. Login.
+3. Panel privado.
+4. Base de datos.
+5. Fotos/videos.
+6. Álbumes.
+7. Timeline.
+8. Carta.
+9. Mensajes.
+10. Responsive.
+
+Después de terminar la V1, detente y muéstrame un resumen de lo realizado, los archivos principales y cualquier configuración que necesite hacer.
+
+La prioridad es:
+
+**Que se vea hermosa en celular + que funcione realmente + que sea fácil de seguir ampliando.**
+
+Quiero que el resultado final se sienta como:
+
+# ❤️ “Un lugar donde Sol y Aaron puedan guardar su historia.”

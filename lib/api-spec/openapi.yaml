@@ -1,0 +1,798 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Private administrator authentication
+  - name: story
+    description: Public story content
+  - name: admin
+    description: Private story management
+  - name: storage
+    description: Persistent media uploads
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Sign in as Sol or Aaron
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Authenticated administrator
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSession"
+        "401":
+          description: Invalid credentials
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Sign out
+      responses:
+        "204":
+          description: Signed out
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Get the current administrator
+      responses:
+        "200":
+          description: Current administrator
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUser"
+        "401":
+          description: Not authenticated
+  /story/public:
+    get:
+      operationId: getPublicStory
+      tags: [story]
+      summary: Get the public story
+      responses:
+        "200":
+          description: Public story content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicStory"
+  /story/admin:
+    get:
+      operationId: getAdminStory
+      tags: [admin]
+      summary: Get all story content for administrators
+      responses:
+        "200":
+          description: Full story content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStory"
+        "401":
+          description: Not authenticated
+  /timeline:
+    get:
+      operationId: listTimeline
+      tags: [admin]
+      summary: List timeline memories
+      responses:
+        "200":
+          description: Timeline memories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TimelineItem"
+    post:
+      operationId: createTimeline
+      tags: [admin]
+      summary: Create a timeline memory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TimelineInput"
+      responses:
+        "201":
+          description: Created timeline memory
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TimelineItem"
+        "401":
+          description: Not authenticated
+  /timeline/{id}:
+    patch:
+      operationId: updateTimeline
+      tags: [admin]
+      summary: Update a timeline memory
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TimelineUpdate"
+      responses:
+        "200":
+          description: Updated timeline memory
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TimelineItem"
+        "401":
+          description: Not authenticated
+        "404":
+          description: Timeline memory not found
+    delete:
+      operationId: deleteTimeline
+      tags: [admin]
+      summary: Delete a timeline memory
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Not authenticated
+        "404":
+          description: Timeline memory not found
+  /albums:
+    get:
+      operationId: listAlbums
+      tags: [admin]
+      summary: List albums
+      responses:
+        "200":
+          description: Albums
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Album"
+    post:
+      operationId: createAlbum
+      tags: [admin]
+      summary: Create an album
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlbumInput"
+      responses:
+        "201":
+          description: Created album
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Album"
+        "401":
+          description: Not authenticated
+  /albums/{id}:
+    patch:
+      operationId: updateAlbum
+      tags: [admin]
+      summary: Update an album
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlbumUpdate"
+      responses:
+        "200":
+          description: Updated album
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Album"
+        "401":
+          description: Not authenticated
+        "404":
+          description: Album not found
+    delete:
+      operationId: deleteAlbum
+      tags: [admin]
+      summary: Delete an album
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Not authenticated
+        "404":
+          description: Album not found
+  /media:
+    get:
+      operationId: listMedia
+      tags: [admin]
+      summary: List media
+      responses:
+        "200":
+          description: Media library
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MediaItem"
+    post:
+      operationId: createMedia
+      tags: [admin]
+      summary: Add uploaded media metadata
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MediaInput"
+      responses:
+        "201":
+          description: Created media item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaItem"
+        "401":
+          description: Not authenticated
+  /media/{id}:
+    patch:
+      operationId: updateMedia
+      tags: [admin]
+      summary: Update media metadata
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MediaUpdate"
+      responses:
+        "200":
+          description: Updated media item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaItem"
+        "401":
+          description: Not authenticated
+        "404":
+          description: Media item not found
+    delete:
+      operationId: deleteMedia
+      tags: [admin]
+      summary: Delete media metadata
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Not authenticated
+        "404":
+          description: Media item not found
+  /letter:
+    get:
+      operationId: getLetter
+      tags: [admin]
+      summary: Get the letter
+      responses:
+        "200":
+          description: Letter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Letter"
+    put:
+      operationId: saveLetter
+      tags: [admin]
+      summary: Save the letter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LetterInput"
+      responses:
+        "200":
+          description: Saved letter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Letter"
+        "401":
+          description: Not authenticated
+  /love-notes:
+    get:
+      operationId: listLoveNotes
+      tags: [admin]
+      summary: List things I love
+      responses:
+        "200":
+          description: Love notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LoveNote"
+    post:
+      operationId: createLoveNote
+      tags: [admin]
+      summary: Create a love note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoveNoteInput"
+      responses:
+        "201":
+          description: Created love note
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoveNote"
+        "401":
+          description: Not authenticated
+  /love-notes/{id}:
+    patch:
+      operationId: updateLoveNote
+      tags: [admin]
+      summary: Update a love note
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoveNoteUpdate"
+      responses:
+        "200":
+          description: Updated love note
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoveNote"
+        "401":
+          description: Not authenticated
+        "404":
+          description: Love note not found
+    delete:
+      operationId: deleteLoveNote
+      tags: [admin]
+      summary: Delete a love note
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Not authenticated
+        "404":
+          description: Love note not found
+  /music:
+    get:
+      operationId: listMusic
+      tags: [admin]
+      summary: List songs
+      responses:
+        "200":
+          description: Songs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MusicItem"
+    post:
+      operationId: createMusic
+      tags: [admin]
+      summary: Add a song
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MusicInput"
+      responses:
+        "201":
+          description: Created song
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MusicItem"
+        "401":
+          description: Not authenticated
+  /music/{id}:
+    delete:
+      operationId: deleteMusic
+      tags: [admin]
+      summary: Delete a song
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Not authenticated
+        "404":
+          description: Song not found
+  /messages:
+    get:
+      operationId: listMessages
+      tags: [admin]
+      summary: List visitor messages
+      responses:
+        "200":
+          description: Messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GuestMessage"
+    post:
+      operationId: createMessage
+      tags: [story]
+      summary: Leave a visitor message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageInput"
+      responses:
+        "201":
+          description: Message received
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GuestMessage"
+  /messages/{id}:
+    patch:
+      operationId: updateMessage
+      tags: [admin]
+      summary: Approve or edit a visitor message
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageUpdate"
+      responses:
+        "200":
+          description: Updated message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GuestMessage"
+        "401":
+          description: Not authenticated
+        "404":
+          description: Message not found
+    delete:
+      operationId: deleteMessage
+      tags: [admin]
+      summary: Delete a visitor message
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Not authenticated
+        "404":
+          description: Message not found
+  /storage/uploads/request-url:
+    post:
+      operationId: requestUploadUrl
+      tags: [storage]
+      summary: Request a private object storage upload URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadRequest"
+      responses:
+        "200":
+          description: Presigned upload details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadResponse"
+        "401":
+          description: Not authenticated
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: number
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    LoginInput:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          enum: [solsaldena, aarongonzalez]
+        password:
+          type: string
+          minLength: 1
+    AdminUser:
+      type: object
+      required: [username, displayName]
+      properties:
+        username: { type: string }
+        displayName: { type: string }
+    AuthSession:
+      type: object
+      required: [user]
+      properties:
+        user:
+          $ref: "#/components/schemas/AdminUser"
+    TimelineItem:
+      type: object
+      required: [id, date, title, description, imageUrl, sortOrder]
+      properties:
+        id: { type: number }
+        date: { type: string }
+        title: { type: string }
+        description: { type: string }
+        imageUrl: { type: ["string", "null"] }
+        sortOrder: { type: number }
+    TimelineInput:
+      type: object
+      required: [date, title, description]
+      properties:
+        date: { type: string }
+        title: { type: string, minLength: 1 }
+        description: { type: string }
+        imageUrl: { type: ["string", "null"] }
+        sortOrder: { type: number }
+    TimelineUpdate:
+      type: object
+      properties:
+        date: { type: string }
+        title: { type: string, minLength: 1 }
+        description: { type: string }
+        imageUrl: { type: ["string", "null"] }
+        sortOrder: { type: number }
+    Album:
+      type: object
+      required: [id, name, description, coverUrl, sortOrder]
+      properties:
+        id: { type: number }
+        name: { type: string }
+        description: { type: string }
+        coverUrl: { type: ["string", "null"] }
+        sortOrder: { type: number }
+    AlbumInput:
+      type: object
+      required: [name, description]
+      properties:
+        name: { type: string, minLength: 1 }
+        description: { type: string }
+        coverUrl: { type: ["string", "null"] }
+        sortOrder: { type: number }
+    AlbumUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        description: { type: string }
+        coverUrl: { type: ["string", "null"] }
+        sortOrder: { type: number }
+    MediaItem:
+      type: object
+      required: [id, title, description, date, albumId, type, objectPath, isPublic]
+      properties:
+        id: { type: number }
+        title: { type: string }
+        description: { type: string }
+        date: { type: string }
+        albumId: { type: ["number", "null"] }
+        type: { type: string, enum: [image, video] }
+        objectPath: { type: string }
+        isPublic: { type: boolean }
+    MediaInput:
+      type: object
+      required: [title, description, date, type, objectPath]
+      properties:
+        title: { type: string, minLength: 1 }
+        description: { type: string }
+        date: { type: string }
+        albumId: { type: ["number", "null"] }
+        type: { type: string, enum: [image, video] }
+        objectPath: { type: string, minLength: 1 }
+        isPublic: { type: boolean }
+    MediaUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        description: { type: string }
+        date: { type: string }
+        albumId: { type: ["number", "null"] }
+        isPublic: { type: boolean }
+    Letter:
+      type: object
+      required: [id, title, content]
+      properties:
+        id: { type: number }
+        title: { type: string }
+        content: { type: string }
+    LetterInput:
+      type: object
+      required: [title, content]
+      properties:
+        title: { type: string }
+        content: { type: string }
+    LoveNote:
+      type: object
+      required: [id, title, content, sortOrder]
+      properties:
+        id: { type: number }
+        title: { type: string }
+        content: { type: string }
+        sortOrder: { type: number }
+    LoveNoteInput:
+      type: object
+      required: [title, content]
+      properties:
+        title: { type: string, minLength: 1 }
+        content: { type: string }
+        sortOrder: { type: number }
+    LoveNoteUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        content: { type: string }
+        sortOrder: { type: number }
+    MusicItem:
+      type: object
+      required: [id, title, artist, url]
+      properties:
+        id: { type: number }
+        title: { type: string }
+        artist: { type: string }
+        url: { type: string }
+    MusicInput:
+      type: object
+      required: [title, artist, url]
+      properties:
+        title: { type: string, minLength: 1 }
+        artist: { type: string }
+        url: { type: string }
+    GuestMessage:
+      type: object
+      required: [id, name, content, isApproved, createdAt]
+      properties:
+        id: { type: number }
+        name: { type: string }
+        content: { type: string }
+        isApproved: { type: boolean }
+        createdAt: { type: string, format: date-time }
+    MessageInput:
+      type: object
+      required: [name, content]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 80 }
+        content: { type: string, minLength: 1, maxLength: 1000 }
+    MessageUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 80 }
+        content: { type: string, minLength: 1, maxLength: 1000 }
+        isApproved: { type: boolean }
+    PublicStory:
+      type: object
+      required: [timeline, albums, media, letter, loveNotes, music, messages]
+      properties:
+        timeline:
+          type: array
+          items: { $ref: "#/components/schemas/TimelineItem" }
+        albums:
+          type: array
+          items: { $ref: "#/components/schemas/Album" }
+        media:
+          type: array
+          items: { $ref: "#/components/schemas/MediaItem" }
+        letter: { $ref: "#/components/schemas/Letter" }
+        loveNotes:
+          type: array
+          items: { $ref: "#/components/schemas/LoveNote" }
+        music:
+          type: array
+          items: { $ref: "#/components/schemas/MusicItem" }
+        messages:
+          type: array
+          items: { $ref: "#/components/schemas/GuestMessage" }
+    AdminStory:
+      type: object
+      required: [timeline, albums, media, letter, loveNotes, music, messages]
+      properties:
+        timeline:
+          type: array
+          items: { $ref: "#/components/schemas/TimelineItem" }
+        albums:
+          type: array
+          items: { $ref: "#/components/schemas/Album" }
+        media:
+          type: array
+          items: { $ref: "#/components/schemas/MediaItem" }
+        letter: { $ref: "#/components/schemas/Letter" }
+        loveNotes:
+          type: array
+          items: { $ref: "#/components/schemas/LoveNote" }
+        music:
+          type: array
+          items: { $ref: "#/components/schemas/MusicItem" }
+        messages:
+          type: array
+          items: { $ref: "#/components/schemas/GuestMessage" }
+    UploadRequest:
+      type: object
+      required: [name, size, contentType]
+      properties:
+        name: { type: string }
+        size: { type: number, maximum: 52428800 }
+        contentType: { type: string, enum: [image/jpeg, image/png, image/webp, video/mp4, video/webm] }
+    UploadResponse:
+      type: object
+      required: [uploadURL, objectPath]
+      properties:
+        uploadURL: { type: string }
+        objectPath: { type: string }
+

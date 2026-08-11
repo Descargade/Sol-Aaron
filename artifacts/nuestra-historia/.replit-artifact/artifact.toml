@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Nuestra Historia"
+description = "Un álbum digital romántico y privado para Sol y Aaron, con una experiencia pública cinematográfica y un panel seguro para administrar recuerdos, fotos, videos, álbumes, timeline, carta y mensajes."
+version = "1.0.0"
+id = "artifacts/nuestra-historia"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23261
+
+[services.development]
+run = "pnpm --filter @workspace/nuestra-historia run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/nuestra-historia", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/nuestra-historia/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23261"
+BASE_PATH = "/"
