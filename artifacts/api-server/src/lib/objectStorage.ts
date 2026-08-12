@@ -76,7 +76,8 @@ export class ObjectStorageService {
     const localDir = join(getLocalDir(), "uploads");
     if (!existsSync(localDir)) mkdirSync(localDir, { recursive: true });
     const objectPath = `/objects/uploads/${id}`;
-    const uploadURL = `/api/storage/local-upload/${id}`;
+    const apiUrl = process.env.API_URL || '';
+    const uploadURL = apiUrl ? `${apiUrl}/api/storage/local-upload/${id}` : `/api/storage/local-upload/${id}`;
     return { uploadURL, objectPath };
   }
 

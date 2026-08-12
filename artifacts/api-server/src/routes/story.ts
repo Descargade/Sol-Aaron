@@ -252,10 +252,12 @@ router.post("/media", requireAuth, async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
+  const objectPath = `/objects/${Date.now().toString(36)}${Math.random().toString(36).substr(2, 8)}`;
   const [item] = await db.insert(mediaTable).values({
     ...parsed.data,
     albumId: parsed.data.albumId ?? null,
     isPublic: parsed.data.isPublic ?? false,
+    objectPath,
   }).returning();
   res.status(201).json(CreateMediaResponse.parse(item));
 });
