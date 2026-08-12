@@ -65,3 +65,6 @@ Thumbs.db
 # Secrets and credentials
 *.pem
 *.key
+
+.vercel
+.env*
