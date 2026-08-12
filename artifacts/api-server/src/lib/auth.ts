@@ -68,8 +68,8 @@ export function createSession(res: Response, userId: number): void {
   sessions.set(token, { userId, expiresAt: Date.now() + SESSION_TTL_MS });
   res.cookie(SESSION_COOKIE, token, {
     httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    sameSite: "none",
+    secure: true,
     maxAge: SESSION_TTL_MS,
     path: "/",
   });
@@ -78,7 +78,7 @@ export function createSession(res: Response, userId: number): void {
 export function destroySession(req: Request, res: Response): void {
   const token = req.cookies?.[SESSION_COOKIE];
   if (token) sessions.delete(token);
-  res.clearCookie(SESSION_COOKIE, { httpOnly: true, sameSite: "lax", path: "/" });
+  res.clearCookie(SESSION_COOKIE, { httpOnly: true, sameSite: "none", path: "/" });
 }
 
 export async function getAuthenticatedUser(req: Request) {

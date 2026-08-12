@@ -26,7 +26,22 @@ app.use(
     },
   }),
 );
-app.use(cors({ origin: true, credentials: true }));
+const allowedOrigins = [
+  "https://nuestra-historia-gamma.vercel.app",
+  "https://nuestra-historia.vercel.app",
+  "https://nuestra-historia-descargades-projects.vercel.app",
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, true);
+    }
+  },
+  credentials: true,
+}));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
