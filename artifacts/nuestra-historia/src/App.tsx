@@ -82,18 +82,10 @@ function PublicStoryPage() {
           <div className="eyebrow"><span className="eyebrow-dot" /> un álbum para volver</div>
           <h1>Sol <em>&</em><br /><strong>Aaron</strong></h1>
           <p>Una colección de días ordinarios que, juntos, se volvieron extraordinarios.</p>
-          <a className="scroll-cue" href="#cumpleanos"><span>↓</span> recorrer la historia</a>
+          <a className="scroll-cue" href="#momentos"><span>↓</span> recorrer la historia</a>
         </div>
         <div className="hero-stamp"><span>desde</span><strong>2025</strong><small>Mendoza · Argentina</small></div>
         <div className="hero-orbit orbit-one" /><div className="hero-orbit orbit-two" />
-      </section>
-
-      <section id="cumpleanos" className="birthday-section content-wrap">
-        <div className="section-kicker">01 / hoy se celebra</div>
-        <div className="birthday-grid">
-          <div><p className="hand-note">para mi persona favorita</p><h2>Feliz cumple,<br /><em>mi amor.</em></h2></div>
-          <div className="birthday-copy"><p>Otro año de vos. Otro año de nosotros. Que este día te encuentre rodeado de todo lo lindo que sembrás sin darte cuenta.</p><span className="signature">S.</span></div>
-        </div>
       </section>
 
       {data.letter && <section id="carta" className="letter-section content-wrap">
