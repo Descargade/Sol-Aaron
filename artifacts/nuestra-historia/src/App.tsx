@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { Link, Route, Router as WouterRouter, Switch, useLocation } from 'wouter';
 import {
@@ -68,6 +68,7 @@ function PublicStoryPage() {
   const createMessage = useCreateMessage();
   const [messageOpen, setMessageOpen] = useState(false);
   const [sent, setSent] = useState(false);
+  const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
   if (story.isLoading) return <PublicLoading />;
   if (story.isError || !story.data) return <PublicError />;
   const data = story.data;
@@ -105,12 +106,12 @@ function PublicStoryPage() {
         <div className="section-heading compact"><div><div className="section-kicker">03 / en imágenes</div><h2>Pequeños <em>universos.</em></h2></div><span className="count-badge">{publicMedia.length} recuerdos</span></div>
         {albums.length ? <div className="album-grid">{albums.map((album, index) => {
           const items = publicMedia.filter((media) => media.albumId === album.id);
-          return <article className={`album-card album-${index % 3}`} key={album.id} data-testid={`card-album-${album.id}`}>
+          return <article className={`album-card album-${index % 3}`} key={album.id} data-testid={`card-album-${album.id}`} onClick={() => setSelectedAlbum(album)} style={{ cursor: 'pointer' }}>
             <div className="album-cover">{album.coverUrl ? <img src={img(album.coverUrl)} alt={album.name} /> : items[0] ? <img src={img(items[0].objectPath)} alt={album.name} /> : <div className="image-placeholder"><ImageIcon size={30} /></div>}<span>{String(items.length).padStart(2, '0')} fotos</span></div>
             <h3>{album.name}</h3><p>{album.description}</p>
           </article>;
         })}</div> : <ComposedEmpty title="El álbum está en blanco" text="Pronto habrá fotos para volver a mirar." />}
-        {publicMedia.length > 0 && <div className="mosaic-gallery">{publicMedia.slice(0, 8).map((item, index) => <div className={`mosaic-item mosaic-${index % 5}`} key={item.id}><img src={img(item.objectPath)} alt={item.title} /><span>{item.title}</span></div>)}</div>}
+        {publicMedia.length > 0 && <div className="mosaic-gallery">{publicMedia.filter((item) => !item.albumId).slice(0, 8).map((item, index) => <div className={`mosaic-item mosaic-${index % 5}`} key={item.id}><img src={img(item.objectPath)} alt={item.title} /><span>{item.title}</span></div>)}</div>}
       </section>
 
       <section className="love-section content-wrap"><div className="section-kicker">04 / inventario de ternura</div><h2>Cosas que amo<br /><em>de vos.</em></h2><div className="love-grid">{data.loveNotes.length ? data.loveNotes.map((note, index) => <article className="love-note" key={note.id}><span>0{index + 1}</span><Heart size={17} /><h3>{note.title}</h3><p>{note.content}</p></article>) : <ComposedEmpty title="Un inventario pendiente" text="Hay tanto para decir que puede esperar un poquito." />}</div></section>
@@ -122,6 +123,7 @@ function PublicStoryPage() {
     </main>
     {messageOpen && <Modal title="Dejá una huella" onClose={() => setMessageOpen(false)}><form onSubmit={(event) => { event.preventDefault(); const form = new FormData(event.currentTarget); createMessage.mutate({ data: { name: String(form.get('name')), content: String(form.get('content')) } }, { onSuccess: () => { setSent(true); setMessageOpen(false); } }); }}><label>tu nombre<input name="name" required maxLength={80} data-testid="input-message-name" /></label><label>un mensaje<textarea name="content" required maxLength={1000} rows={5} data-testid="input-message-content" /></label><button className="button dark full" disabled={createMessage.isPending} data-testid="button-submit-message">{createMessage.isPending ? 'guardando…' : <><Send size={16} /> enviar con cariño</>}</button></form></Modal>}
     {sent && <div className="toast-note"><Check size={16} /> Gracias. El mensaje quedó esperando aprobación.</div>}
+    {selectedAlbum && <AlbumDetailModal album={selectedAlbum} allMedia={publicMedia} onClose={() => setSelectedAlbum(null)} imgFn={img} />}
   </Shell>;
 }
 
@@ -130,7 +132,6 @@ function ComposedEmpty({ title, text }: { title: string; text: string }) { retur
 function LetterEnvelope({ title, content }: { title: string; content: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isRevealed, setIsRevealed] = useState(false);
-  const contentRef = useRef<HTMLDivElement>(null);
 
   const handleOpen = () => {
     if (!isOpen) {
@@ -157,22 +158,43 @@ function LetterEnvelope({ title, content }: { title: string; content: string }) 
             <div className="envelope-flap" />
             <div className="envelope-front-design">
               <div className="envelope-seal"><Heart size={22} /></div>
-              <span className="envelope-to">para A.</span>
-              <span className="envelope-from">de S.</span>
+              <span className="envelope-to">Para Sol</span>
+              <span className="envelope-from">de Aaron</span>
             </div>
           </div>
         </div>
         <div className="letter-flip-back">
           <div className="letter-paper">
-            <div className="paper-top"><span>carta abierta</span><span>para A.</span></div>
+            <div className="paper-top"><span>para Sol</span><span>{title || 'carta abierta'}</span></div>
             <Quote className="quote-mark" size={34} />
             <h2>{title || 'Lo que no siempre digo'}</h2>
-            <div className="letter-content" ref={contentRef}>{content.split('\n').map((line, index) => <p key={index} className={isRevealed ? 'revealed' : ''} style={{ transitionDelay: `${index * 80}ms` }}>{line || '\u00a0'}</p>)}</div>
-            <div className="paper-bottom"><span>con amor, siempre</span><strong>Sol</strong></div>
+            <div className="letter-content">{content.split('\n').map((line, index) => <p key={index} className={isRevealed ? 'revealed' : ''} style={{ transitionDelay: `${index * 80}ms` }}>{line || '\u00a0'}</p>)}</div>
+            <div className="paper-bottom"><span>con amor, siempre</span><strong>Aaron</strong></div>
           </div>
         </div>
       </div>
     </div>
+  </div>;
+}
+
+function AlbumDetailModal({ album, allMedia, onClose, imgFn }: { album: Album; allMedia: MediaItem[]; onClose: () => void; imgFn: (p?: string | null) => string }) {
+  const items = allMedia.filter((m) => m.albumId === album.id);
+  const [viewer, setViewer] = useState<MediaItem | null>(null);
+  return <div className="modal-backdrop" role="dialog" onClick={onClose}><div className="modal album-detail-modal" onClick={(e) => e.stopPropagation()}>
+    <button className="modal-close" onClick={onClose}><X size={18} /></button>
+    <div className="section-kicker">álbum</div>
+    <h2>{album.name}</h2>
+    {album.description && <p className="album-detail-desc">{album.description}</p>}
+    {items.length ? <div className="album-detail-grid">{items.map((item) => <div className="album-detail-item" key={item.id} onClick={() => setViewer(item)}>
+      {item.type === 'video' ? <div className="album-detail-thumb video-thumb"><CirclePlay size={30} /></div> : <img src={imgFn(item.objectPath)} alt={item.title} />}
+      <span>{item.title}</span>
+    </div>)}</div> : <ComposedEmpty title="Vacío por ahora" text="Todavía no hay fotos en este álbum." />}
+  </div>
+  {viewer && <div className="modal-backdrop media-viewer" onClick={() => setViewer(null)}>
+    <button className="modal-close viewer-close" onClick={() => setViewer(null)}><X size={22} /></button>
+    {viewer.type === 'video' ? <video src={imgFn(viewer.objectPath)} controls autoPlay /> : <img src={imgFn(viewer.objectPath)} alt={viewer.title} />}
+    <div className="viewer-caption"><strong>{viewer.title}</strong>{viewer.description && <p>{viewer.description}</p>}</div>
+  </div>}
   </div>;
 }
 
