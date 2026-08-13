@@ -404,7 +404,7 @@ h2 em { color: hsl(345 46% 37%); }
 .timeline-card { display: grid; grid-template-columns: 130px 1fr; gap: 21px; position: relative; margin-bottom: 48px; }
 .timeline-card.offset { margin-left: 0; }
 .timeline-image { height: 170px; position: relative; overflow: hidden; background: hsl(34 25% 84%); }
-.timeline-image img, .album-cover img, .mosaic-item img, .media-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.timeline-image img, .album-cover img, .mosaic-item img, .mosaic-item video, .media-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .image-placeholder { height: 100%; display: grid; place-items: center; color: hsl(14 68% 67%); background: linear-gradient(135deg, hsl(35 38% 94%), hsl(34 25% 84%)); }
 .timeline-index { position: absolute; top: 9px; left: 9px; background: hsl(345 46% 37%); color: hsl(35 38% 94%); font-family: var(--app-font-mono); padding: 6px 7px; font-size: 9px; }
 .timeline-info time, .row-main time, .message-admin-row time { font-family: var(--app-font-mono); color: hsl(14 68% 59%); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; }
@@ -438,7 +438,7 @@ h2 em { color: hsl(345 46% 37%); }
 .viewer-caption p { color: hsl(35 20% 72%); margin: 4px 0 0; }
 .mosaic-gallery { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 110px; gap: 6px; margin-top: 74px; }
 .mosaic-item { overflow: hidden; position: relative; background: hsl(35 31% 89%); }
-.mosaic-item img { transition: transform .5s ease; }
+.mosaic-item img, .mosaic-item video { transition: transform .5s ease; }
 .mosaic-item:hover img { transform: scale(1.05); }
 .mosaic-item span { position: absolute; left: 7px; bottom: 6px; color: white; font-size: 9px; opacity: 0; transition: opacity .2s; }
 .mosaic-item:hover span { opacity: 1; }

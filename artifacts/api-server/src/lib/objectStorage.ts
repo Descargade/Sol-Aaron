@@ -33,6 +33,19 @@ async function getGCSClient() {
 
 export class ObjectNotFoundError extends Error {}
 
+function detectContentType(buf: Buffer): string {
+  if (buf.length < 4) return "application/octet-stream";
+  if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return "image/jpeg";
+  if (buf[0] === 0x89 && buf.toString("ascii", 1, 4) === "PNG") return "image/png";
+  if (buf.toString("ascii", 0, 4) === "GIF8") return "image/gif";
+  if (buf.toString("ascii", 0, 4) === "RIFF" && buf.toString("ascii", 8, 12) === "WEBP") return "image/webp";
+  if (buf.length >= 12 && buf.toString("ascii", 4, 8) === "ftyp" && buf.toString("ascii", 8, 12) === "qt  ") return "video/quicktime";
+  if (buf.length >= 12 && buf.toString("ascii", 4, 8) === "ftyp") return "video/mp4";
+  if (buf[0] === 0x1a && buf[1] === 0x45 && buf[2] === 0xdf && buf[3] === 0xa3) return "video/webm";
+  if (buf[0] === 0x1a && buf[1] === 0x45 && buf[2] === 0xdf && buf[3] === 0xa4) return "video/webm";
+  return "application/octet-stream";
+}
+
 function getLocalDir(): string {
   const dir = process.env.PRIVATE_OBJECT_DIR || "/tmp/uploads";
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
@@ -108,13 +121,7 @@ export class ObjectStorageService {
     const localPath = join(getLocalDir(), relativePath);
     if (!existsSync(localPath)) throw new ObjectNotFoundError();
     const buffer = await readFile(localPath);
-    const ext = localPath.split(".").pop()?.toLowerCase() || "";
-    const contentTypes: Record<string, string> = {
-      jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", gif: "image/gif",
-      webp: "image/webp", svg: "image/svg+xml", mp4: "video/mp4", mp3: "audio/mpeg",
-      pdf: "application/pdf",
-    };
-    return { buffer, contentType: contentTypes[ext] || "application/octet-stream" };
+    return { buffer, contentType: detectContentType(buffer) };
   }
 
   async download(file: { buffer: Buffer; contentType: string }, cacheTtlSec = 3600): Promise<Response> {

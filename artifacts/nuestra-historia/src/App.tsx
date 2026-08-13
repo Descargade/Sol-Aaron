@@ -111,7 +111,7 @@ function PublicStoryPage() {
             <h3>{album.name}</h3><p>{album.description}</p>
           </article>;
         })}</div> : <ComposedEmpty title="El álbum está en blanco" text="Pronto habrá fotos para volver a mirar." />}
-        {publicMedia.length > 0 && <div className="mosaic-gallery">{publicMedia.filter((item) => !item.albumId).slice(0, 8).map((item, index) => <div className={`mosaic-item mosaic-${index % 5}`} key={item.id}><img src={img(item.objectPath)} alt={item.title} /><span>{item.title}</span></div>)}</div>}
+        {publicMedia.length > 0 && <div className="mosaic-gallery">{publicMedia.filter((item) => !item.albumId).slice(0, 8).map((item, index) => <div className={`mosaic-item mosaic-${index % 5}`} key={item.id}>{item.type === 'video' ? <video src={img(item.objectPath)} muted preload="metadata" /> : <img src={img(item.objectPath)} alt={item.title} />}<span>{item.title}</span></div>)}</div>}
       </section>
 
       <section className="love-section content-wrap"><div className="section-kicker">04 / inventario de ternura</div><h2>Cosas que amo<br /><em>de vos.</em></h2><div className="love-grid">{data.loveNotes.length ? data.loveNotes.map((note, index) => <article className="love-note" key={note.id}><span>0{index + 1}</span><Heart size={17} /><h3>{note.title}</h3><p>{note.content}</p></article>) : <ComposedEmpty title="Un inventario pendiente" text="Hay tanto para decir que puede esperar un poquito." />}</div></section>
