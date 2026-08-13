@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { Link, Route, Router as WouterRouter, Switch, useLocation } from 'wouter';
 import {
@@ -89,13 +89,8 @@ function PublicStoryPage() {
       </section>
 
       {data.letter && <section id="carta" className="letter-section content-wrap">
-        <div className="letter-paper">
-          <div className="paper-top"><span>carta abierta</span><span>para A.</span></div>
-          <Quote className="quote-mark" size={34} />
-          <h2>{data.letter.title || 'Lo que no siempre digo'}</h2>
-          <div className="letter-content">{data.letter.content.split('\n').map((line, index) => <p key={index}>{line || '\u00a0'}</p>)}</div>
-          <div className="paper-bottom"><span>con amor, siempre</span><strong>Sol</strong></div>
-        </div>
+        <div className="section-heading"><div><div className="section-kicker">01 / para vos</div><h2>Una carta<br /><em>para abrir.</em></h2></div></div>
+        <LetterEnvelope title={data.letter.title} content={data.letter.content} />
       </section>}
 
       <section id="momentos" className="timeline-section content-wrap">
@@ -131,6 +126,55 @@ function PublicStoryPage() {
 }
 
 function ComposedEmpty({ title, text }: { title: string; text: string }) { return <div className="composed-empty"><div><Sparkles size={18} /></div><h3>{title}</h3><p>{text}</p></div>; }
+
+function LetterEnvelope({ title, content }: { title: string; content: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isRevealed, setIsRevealed] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const handleOpen = () => {
+    if (!isOpen) {
+      setIsOpen(true);
+      setTimeout(() => setIsRevealed(true), 600);
+    } else {
+      setIsRevealed(false);
+      setTimeout(() => setIsOpen(false), 400);
+    }
+  };
+
+  return <div className={`letter-envelope-wrapper ${isOpen ? 'open' : ''}`}>
+    <button className="letter-open-btn" onClick={handleOpen} data-testid="button-open-letter">
+      {isOpen ? (
+        <><LockKeyhole size={16} /> cerrar carta</>
+      ) : (
+        <><Mail size={16} /> abrir carta</>
+      )}
+    </button>
+    <div className="letter-flip-container" onClick={handleOpen}>
+      <div className="letter-flip-card">
+        <div className="letter-flip-front">
+          <div className="envelope-body">
+            <div className="envelope-flap" />
+            <div className="envelope-front-design">
+              <div className="envelope-seal"><Heart size={22} /></div>
+              <span className="envelope-to">para A.</span>
+              <span className="envelope-from">de S.</span>
+            </div>
+          </div>
+        </div>
+        <div className="letter-flip-back">
+          <div className="letter-paper">
+            <div className="paper-top"><span>carta abierta</span><span>para A.</span></div>
+            <Quote className="quote-mark" size={34} />
+            <h2>{title || 'Lo que no siempre digo'}</h2>
+            <div className="letter-content" ref={contentRef}>{content.split('\n').map((line, index) => <p key={index} className={isRevealed ? 'revealed' : ''} style={{ transitionDelay: `${index * 80}ms` }}>{line || '\u00a0'}</p>)}</div>
+            <div className="paper-bottom"><span>con amor, siempre</span><strong>Sol</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>;
+}
 
 function Modal({ title, children, onClose }: { title: string; children: ReactNode; onClose: () => void }) {
   return <div className="modal-backdrop" role="dialog"><div className="modal"><button className="modal-close" onClick={onClose} data-testid="button-close-modal"><X size={18} /></button><div className="section-kicker">espacio privado</div><h2>{title}</h2>{children}</div></div>;
@@ -211,7 +255,7 @@ function AlbumForm({ item, onClose }: { item: Album | null; onClose: () => void 
       setProgress('preparando subida…');
       const result = await request.mutateAsync({ data: { name: file.name, size: file.size, contentType: file.type as any } });
       setProgress('subiendo portada…');
-      await fetch(result.uploadURL, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file });
+      await fetch(result.uploadURL, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file, credentials: 'include' });
       coverUrl = result.objectPath;
     }
 
@@ -235,7 +279,7 @@ function AlbumForm({ item, onClose }: { item: Album | null; onClose: () => void 
 
 function MediaAdmin({ items, albums }: { items: MediaItem[]; albums: Album[] }) { const [open, setOpen] = useState(false); return <><AdminCrud kicker="archivo / multimedia" title="Fotos y videos" addLabel="subir archivo" onAdd={() => setOpen(true)}><div className="media-admin-grid">{items.map((item) => <div className="media-admin-card" key={item.id}><div className="media-preview">{item.type === 'video' ? <CirclePlay size={26} /> : item.objectPath && <img src={img(item.objectPath)} alt="" />}</div><div><strong>{item.title}</strong><span>{item.isPublic ? 'público' : 'privado'} · {albums.find((a) => a.id === item.albumId)?.name || 'sin álbum'}</span></div><MediaRowActions item={item} /></div>)}</div>{!items.length && <ComposedEmpty title="La galería espera imágenes." text="Subí ese recuerdo que todavía vive en tu teléfono." />}</AdminCrud>{open && <MediaForm albums={albums} onClose={() => setOpen(false)} />}</>; }
 function MediaRowActions({ item }: { item: MediaItem }) { const del = useDeleteMedia(); const update = useUpdateMedia(); const qc = useQueryClient(); return <div className="row-actions"><button onClick={() => update.mutate({ id: item.id, data: { isPublic: !item.isPublic } }, { onSuccess: () => { qc.invalidateQueries({ queryKey: getListMediaQueryKey() }); qc.invalidateQueries({ queryKey: getGetAdminStoryQueryKey() }); } })} data-testid={`button-toggle-media-${item.id}`} title="Cambiar visibilidad">{item.isPublic ? <ShieldCheck size={15} /> : <LockKeyhole size={15} />}</button><button onClick={() => { if (confirm('¿Eliminar este archivo?')) del.mutate({ id: item.id }, { onSuccess: () => qc.invalidateQueries({ queryKey: getListMediaQueryKey() }) }); }} data-testid={`button-delete-media-${item.id}`}><Trash2 size={15} /></button></div>; }
-function MediaForm({ item, onClose }: { item: MediaItem | null; onClose: () => void }) { const request = useRequestUploadUrl(); const create = useCreateMedia(); const qc = useQueryClient(); const [file, setFile] = useState<File | null>(null); const [progress, setProgress] = useState(''); const submit = async (e: FormEvent<HTMLFormElement>) => { e.preventDefault(); const f = new FormData(e.currentTarget); let objectPath = String(f.get('objectPath') || ''); if (file) { setProgress('preparando subida…'); const result = await request.mutateAsync({ data: { name: file.name, size: file.size, contentType: file.type as any } }); setProgress('subiendo archivo…'); await fetch(result.uploadURL, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file }); objectPath = result.objectPath; } if (!objectPath) return; create.mutate({ data: { title: String(f.get('title')), description: String(f.get('description')), date: String(f.get('date')), type: file?.type.startsWith('video') ? 'video' : 'image', objectPath, albumId: f.get('albumId') ? Number(f.get('albumId')) : null, isPublic: f.get('isPublic') === 'on' } }, { onSuccess: () => { qc.invalidateQueries({ queryKey: getListMediaQueryKey() }); qc.invalidateQueries({ queryKey: getGetAdminStoryQueryKey() }); onClose(); } }); }; return <Modal title="Subir un recuerdo" onClose={onClose}><form onSubmit={submit}><label className="file-drop"><UploadCloud size={24} /><strong>{file ? file.name : 'Elegí una foto o video'}</strong><small>JPG, PNG, WEBP, MP4 · hasta 50 MB</small><input type="file" accept="image/*,video/*" onChange={(e) => setFile(e.target.files?.[0] || null)} data-testid="input-media-file" /></label><Field name="title" label="título" required /><Field name="date" label="fecha" type="date" required /><Field name="description" label="descripción" /><label>álbum<select name="albumId" data-testid="select-media-album"><option value="">sin álbum</option>{albums.map((a) => <option value={a.id} key={a.id}>{a.name}</option>)}</select></label><label className="check-line"><input type="checkbox" name="isPublic" defaultChecked data-testid="checkbox-media-public" /> visible en la historia pública</label><p className="form-hint">{progress}</p><button className="button dark full" disabled={create.isPending || request.isPending} data-testid="button-save-media"><UploadCloud size={16} /> {progress || 'guardar archivo'}</button></form></Modal>; }
+function MediaForm({ albums, item, onClose }: { albums: Album[]; item: MediaItem | null; onClose: () => void }) { const request = useRequestUploadUrl(); const create = useCreateMedia(); const qc = useQueryClient(); const [file, setFile] = useState<File | null>(null); const [progress, setProgress] = useState(''); const submit = async (e: FormEvent<HTMLFormElement>) => { e.preventDefault(); const f = new FormData(e.currentTarget); let objectPath = String(f.get('objectPath') || ''); if (file) { setProgress('preparando subida…'); const result = await request.mutateAsync({ data: { name: file.name, size: file.size, contentType: file.type as any } }); setProgress('subiendo archivo…'); await fetch(result.uploadURL, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file, credentials: 'include' }); objectPath = result.objectPath; } if (!objectPath) return; create.mutate({ data: { title: String(f.get('title')), description: String(f.get('description')), date: String(f.get('date')), type: file?.type.startsWith('video') ? 'video' : 'image', objectPath, albumId: f.get('albumId') ? Number(f.get('albumId')) : null, isPublic: f.get('isPublic') === 'on' } }, { onSuccess: () => { qc.invalidateQueries({ queryKey: getListMediaQueryKey() }); qc.invalidateQueries({ queryKey: getGetAdminStoryQueryKey() }); onClose(); } }); };; return <Modal title="Subir un recuerdo" onClose={onClose}><form onSubmit={submit}><label className="file-drop"><UploadCloud size={24} /><strong>{file ? file.name : 'Elegí una foto o video'}</strong><small>JPG, PNG, WEBP, MP4 · hasta 50 MB</small><input type="file" accept="image/*,video/*" onChange={(e) => setFile(e.target.files?.[0] || null)} data-testid="input-media-file" /></label><Field name="title" label="título" required /><Field name="date" label="fecha" type="date" required /><Field name="description" label="descripción" /><label>álbum<select name="albumId" data-testid="select-media-album"><option value="">sin álbum</option>{albums.map((a) => <option value={a.id} key={a.id}>{a.name}</option>)}</select></label><label className="check-line"><input type="checkbox" name="isPublic" defaultChecked data-testid="checkbox-media-public" /> visible en la historia pública</label><p className="form-hint">{progress}</p><button className="button dark full" disabled={create.isPending || request.isPending} data-testid="button-save-media"><UploadCloud size={16} /> {progress || 'guardar archivo'}</button></form></Modal>; }
 
 function LetterAdmin({ letter }: { letter: any }) { const save = useSaveLetter(); const qc = useQueryClient(); return <div className="admin-content"><AdminHead kicker="archivo / carta" title="La carta" /><form className="letter-editor" onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget); save.mutate({ data: { title: String(f.get('title')), content: String(f.get('content')) } }, { onSuccess: () => { qc.invalidateQueries({ queryKey: getGetLetterQueryKey() }); qc.invalidateQueries({ queryKey: getGetAdminStoryQueryKey() }); } }); }}><Field name="title" label="título" defaultValue={letter?.title} /><label>cuerpo de la carta<textarea name="content" rows={16} defaultValue={letter?.content} data-testid="textarea-letter-content" /></label><div className="editor-footer"><span>{save.isSuccess ? 'guardado en el álbum' : 'La carta es solo de ustedes.'}</span><button className="button dark" data-testid="button-save-letter"><Check size={16} /> guardar cambios</button></div></form></div>; }
 

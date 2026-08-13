@@ -30,11 +30,13 @@ const allowedOrigins = [
   "https://nuestra-historia-gamma.vercel.app",
   "https://nuestra-historia.vercel.app",
   "https://nuestra-historia-descargades-projects.vercel.app",
+  "https://nuestra-historia-fdmmd3o2b-descargades-projects.vercel.app",
+  "https://nuestra-historia-op0j32gnq-descargades-projects.vercel.app",
 ];
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
       callback(null, true);
     } else {
       callback(null, true);
