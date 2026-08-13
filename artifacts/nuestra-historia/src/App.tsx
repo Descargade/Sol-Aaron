@@ -69,6 +69,7 @@ function PublicStoryPage() {
   const [messageOpen, setMessageOpen] = useState(false);
   const [sent, setSent] = useState(false);
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
+  const [selectedLoose, setSelectedLoose] = useState<MediaItem | null>(null);
   if (story.isLoading) return <PublicLoading />;
   if (story.isError || !story.data) return <PublicError />;
   const data = story.data;
@@ -111,7 +112,7 @@ function PublicStoryPage() {
             <h3>{album.name}</h3><p>{album.description}</p>
           </article>;
         })}</div> : <ComposedEmpty title="El álbum está en blanco" text="Pronto habrá fotos para volver a mirar." />}
-        {publicMedia.length > 0 && <div className="mosaic-gallery">{publicMedia.filter((item) => !item.albumId).slice(0, 8).map((item, index) => <div className={`mosaic-item mosaic-${index % 5}`} key={item.id}>{item.type === 'video' ? <video src={img(item.objectPath)} muted preload="metadata" /> : <img src={img(item.objectPath)} alt={item.title} />}<span>{item.title}</span></div>)}</div>}
+        {publicMedia.length > 0 && <div className="mosaic-gallery">{publicMedia.filter((item) => !item.albumId).slice(0, 8).map((item, index) => <div className={`mosaic-item mosaic-${index % 5}`} key={item.id} onClick={() => setSelectedLoose(item)} style={{ cursor: 'pointer' }}>{item.type === 'video' ? <video src={img(item.objectPath)} muted preload="metadata" /> : <img src={img(item.objectPath)} alt={item.title} />}<span>{item.title}</span></div>)}</div>}
       </section>
 
       <section className="love-section content-wrap"><div className="section-kicker">04 / inventario de ternura</div><h2>Cosas que amo<br /><em>de vos.</em></h2><div className="love-grid">{data.loveNotes.length ? data.loveNotes.map((note, index) => <article className="love-note" key={note.id}><span>0{index + 1}</span><Heart size={17} /><h3>{note.title}</h3><p>{note.content}</p></article>) : <ComposedEmpty title="Un inventario pendiente" text="Hay tanto para decir que puede esperar un poquito." />}</div></section>
@@ -124,6 +125,11 @@ function PublicStoryPage() {
     {messageOpen && <Modal title="Dejá una huella" onClose={() => setMessageOpen(false)}><form onSubmit={(event) => { event.preventDefault(); const form = new FormData(event.currentTarget); createMessage.mutate({ data: { name: String(form.get('name')), content: String(form.get('content')) } }, { onSuccess: () => { setSent(true); setMessageOpen(false); } }); }}><label>tu nombre<input name="name" required maxLength={80} data-testid="input-message-name" /></label><label>un mensaje<textarea name="content" required maxLength={1000} rows={5} data-testid="input-message-content" /></label><button className="button dark full" disabled={createMessage.isPending} data-testid="button-submit-message">{createMessage.isPending ? 'guardando…' : <><Send size={16} /> enviar con cariño</>}</button></form></Modal>}
     {sent && <div className="toast-note"><Check size={16} /> Gracias. El mensaje quedó esperando aprobación.</div>}
     {selectedAlbum && <AlbumDetailModal album={selectedAlbum} allMedia={publicMedia} onClose={() => setSelectedAlbum(null)} imgFn={img} />}
+    {selectedLoose && <div className="modal-backdrop media-viewer" onClick={() => setSelectedLoose(null)}>
+      <button className="modal-close viewer-close" onClick={() => setSelectedLoose(null)}><X size={22} /></button>
+      {selectedLoose.type === 'video' ? <video src={img(selectedLoose.objectPath)} controls autoPlay /> : <img src={img(selectedLoose.objectPath)} alt={selectedLoose.title} />}
+      <div className="viewer-caption"><strong>{selectedLoose.title}</strong>{selectedLoose.description && <p>{selectedLoose.description}</p>}</div>
+    </div>}
   </Shell>;
 }
 

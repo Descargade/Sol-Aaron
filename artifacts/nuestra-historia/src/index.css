@@ -439,7 +439,7 @@ h2 em { color: hsl(345 46% 37%); }
 .mosaic-gallery { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 110px; gap: 6px; margin-top: 74px; }
 .mosaic-item { overflow: hidden; position: relative; background: hsl(35 31% 89%); }
 .mosaic-item img, .mosaic-item video { transition: transform .5s ease; }
-.mosaic-item:hover img { transform: scale(1.05); }
+.mosaic-item:hover img, .mosaic-item:hover video { transform: scale(1.05); }
 .mosaic-item span { position: absolute; left: 7px; bottom: 6px; color: white; font-size: 9px; opacity: 0; transition: opacity .2s; }
 .mosaic-item:hover span { opacity: 1; }
 .mosaic-1 { grid-row: span 2; }.mosaic-2 { grid-column: span 2; }.mosaic-4 { grid-column: span 2; }
