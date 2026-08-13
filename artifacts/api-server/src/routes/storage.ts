@@ -22,8 +22,9 @@ router.post("/storage/uploads/request-url", requireAuth, async (req, res): Promi
   res.json(RequestUploadUrlResponse.parse(result));
 });
 
-router.put("/storage/local-upload/:id", requireAuth, async (req, res): Promise<void> => {
+router.put("/storage/local-upload/:id", async (req, res): Promise<void> => {
   const { id } = req.params;
+  if (!/^[0-9a-f-]{36}$/i.test(id)) { res.status(400).json({ error: "Invalid id" }); return; }
   const privateDir = process.env.PRIVATE_OBJECT_DIR || "/tmp/uploads";
   const localDir = join(privateDir, "uploads");
   if (!existsSync(localDir)) mkdirSync(localDir, { recursive: true });
